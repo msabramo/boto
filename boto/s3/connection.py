@@ -23,7 +23,12 @@
 # IN THE SOFTWARE.
 
 import xml.sax
-import urllib
+try:
+    # Python 2
+    from urllib import quote
+except ImportError:
+    # Python 3
+    from urllib.parse import quote
 import base64
 import time
 
@@ -91,11 +96,11 @@ class _CallingFormat(object):
         path = ''
         if bucket != '':
             path = '/' + bucket
-        return path + '/%s' % urllib.quote(key)
+        return path + '/%s' % quote(key)
 
     def build_path_base(self, bucket, key=''):
         key = boto.utils.get_utf8_value(key)
-        return '/%s' % urllib.quote(key)
+        return '/%s' % quote(key)
 
 
 class SubdomainCallingFormat(_CallingFormat):
@@ -122,7 +127,7 @@ class OrdinaryCallingFormat(_CallingFormat):
         path_base = '/'
         if bucket:
             path_base += "%s/" % bucket
-        return path_base + urllib.quote(key)
+        return path_base + quote(key)
 
 
 class ProtocolIndependentOrdinaryCallingFormat(OrdinaryCallingFormat):
@@ -336,7 +341,7 @@ class S3Connection(AWSAuthConnection):
             extra_qp.append("versionId=%s" % version_id)
         if response_headers:
             for k, v in response_headers.items():
-                extra_qp.append("%s=%s" % (k, urllib.quote(v)))
+                extra_qp.append("%s=%s" % (k, quote(v)))
         if self.provider.security_token:
             headers['x-amz-security-token'] = self.provider.security_token
         if extra_qp:
@@ -345,7 +350,7 @@ class S3Connection(AWSAuthConnection):
         c_string = boto.utils.canonical_string(method, auth_path, headers,
                                                expires, self.provider)
         b64_hmac = self._auth_handler.sign_string(c_string)
-        encoded_canonical = urllib.quote(b64_hmac, safe='')
+        encoded_canonical = quote(b64_hmac, safe='')
         self.calling_format.build_path_base(bucket, key)
         if query_auth:
             query_part = '?' + self.QueryString % (encoded_canonical, expires,
@@ -358,7 +363,7 @@ class S3Connection(AWSAuthConnection):
                 if k.startswith(hdr_prefix):
                     # headers used for sig generation must be
                     # included in the url also.
-                    extra_qp.append("%s=%s" % (k, urllib.quote(v)))
+                    extra_qp.append("%s=%s" % (k, quote(v)))
         if extra_qp:
             delimiter = '?' if not query_part else '&'
             query_part += delimiter + '&'.join(extra_qp)

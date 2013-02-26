@@ -24,8 +24,13 @@
 import mimetypes
 import os
 import re
-import rfc822
-import StringIO
+from email.utils import parsedate_tz, mktime_tz
+try:
+    # Python 2
+    from StringIO import StringIO
+except ImportError:
+    # Python 3
+    from io import StringIO
 import base64
 import math
 import urllib
@@ -1171,7 +1176,7 @@ class Key(object):
         """
         if isinstance(s, unicode):
             s = s.encode("utf-8")
-        fp = StringIO.StringIO(s)
+        fp = StringIO(s)
         r = self.set_contents_from_file(fp, headers, replace, cb, num_cb,
                                         policy, md5, reduced_redundancy,
                                         encrypt_key=encrypt_key)
@@ -1429,8 +1434,8 @@ class Key(object):
         # if last_modified date was sent from s3, try to set file's timestamp
         if self.last_modified != None:
             try:
-                modified_tuple = rfc822.parsedate_tz(self.last_modified)
-                modified_stamp = int(rfc822.mktime_tz(modified_tuple))
+                modified_tuple = parsedate_tz(self.last_modified)
+                modified_stamp = int(mktime_tz(modified_tuple))
                 os.utime(fp.name, (modified_stamp, modified_stamp))
             except Exception:
                 pass
@@ -1476,7 +1481,7 @@ class Key(object):
         :rtype: string
         :returns: The contents of the file as a string
         """
-        fp = StringIO.StringIO()
+        fp = StringIO()
         self.get_contents_to_file(fp, headers, cb, num_cb, torrent=torrent,
                                   version_id=version_id,
                                   response_headers=response_headers)
