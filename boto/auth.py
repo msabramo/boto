@@ -168,7 +168,7 @@ class HmacAuthV1Handler(AuthHandler, HmacKeys):
         auth_hdr = self._provider.auth_header
         headers['Authorization'] = ("%s %s:%s" %
                                     (auth_hdr,
-                                     self._provider.access_key, b64_hmac))
+                                     self._provider.access_key, b64_hmac.decode('ascii')))
 
 
 class HmacAuthV2Handler(AuthHandler, HmacKeys):
