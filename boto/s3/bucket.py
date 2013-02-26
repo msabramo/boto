@@ -25,6 +25,7 @@ import boto
 from boto import handler
 from boto.resultset import ResultSet
 from boto.exception import BotoClientError
+from boto.compat23 import ensure_bytes
 from boto.s3.acl import Policy, CannedACLStrings, Grant
 from boto.s3.key import Key
 from boto.s3.prefix import Prefix
@@ -1197,7 +1198,7 @@ class Bucket(object):
         if response.status == 200:
             lifecycle = Lifecycle()
             h = handler.XmlHandler(lifecycle, self)
-            xml.sax.parseString(body, h)
+            xml.sax.parseString(ensure_bytes(body), h)
             return lifecycle
         else:
             raise self.connection.provider.storage_response_error(
@@ -1575,7 +1576,7 @@ class Bucket(object):
         response = self.get_xml_tags()
         tags = Tags()
         h = handler.XmlHandler(tags, self)
-        xml.sax.parseString(response, h)
+        xml.sax.parseString(ensure_bytes(response), h)
         return tags
 
     def get_xml_tags(self):

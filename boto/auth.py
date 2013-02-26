@@ -108,7 +108,7 @@ class HmacKeys(object):
 
     def sign_string(self, string_to_sign):
         new_hmac = self._get_hmac()
-        new_hmac.update(string_to_sign)
+        new_hmac.update(ensure_bytes(string_to_sign))
         return base64.encodestring(new_hmac.digest()).strip()
 
     def __getstate__(self):
